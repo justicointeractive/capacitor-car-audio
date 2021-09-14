@@ -7,12 +7,19 @@ import Capacitor
  */
 @objc(CarAudioPlugin)
 public class CarAudioPlugin: CAPPlugin {
-    private let implementation = CarAudio()
+    @objc func setRoot(_ call: CAPPluginCall) {
+        let url = call.getString("url") ?? ""
+        UserDefaults.standard.setCarAudioPluginUrl(url)
+        call.resolve()
+    }
+}
 
-    @objc func echo(_ call: CAPPluginCall) {
-        let value = call.getString("value") ?? ""
-        call.resolve([
-            "value": implementation.echo(value)
-        ])
+extension UserDefaults {
+    @objc dynamic var carAudioPluginUrl: String? {
+        return string(forKey: "carAudioPluginUrl")
+    }
+    func setCarAudioPluginUrl(_ url: String) {
+        setValue(url, forKey: "carAudioPluginUrl")
+        synchronize()
     }
 }
