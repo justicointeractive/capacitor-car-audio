@@ -8,22 +8,26 @@
 import Foundation
 
 
-struct CarAudioServiceResponse : Codable {
+struct CarAudioServiceRootResponse : Codable {
     let type: String;
-    let items: [CarAudioResponseSection];
+    let items: [CarAudioServiceSectionReferenceResponse];
 }
 
-struct CarAudioResponseSection : Codable {
+struct CarAudioServiceSectionReferenceResponse : Codable {
     let title: String;
     let icon: String;
     let type: String;
+    let url: String;
+}
+
+struct CarAudioServiceSectionResponse : Codable {
     let items: [CarAudioResponseSectionGroup];
 }
 
 struct CarAudioResponseSectionGroup : Codable {
     let type: String;
     let title: String;
-    let displayAs: String;
+    let displayAs: String?;
     let items: [CarAudioResponseSectionItem];
 }
 
@@ -31,13 +35,14 @@ struct CarAudioResponseSectionItem : Codable {
     let type: String;
     let title: String;
     let description: String;
-    let url: String;
+    let url: String?;
     let imageUrl: String?;
+    let publishDate: String?;
 }
 
 
 class CarAudioService {
-    func getRoot(rootUrl:URL, completionHandler: @escaping (_ response:CarAudioServiceResponse) -> Void) {
+    private func get<T>(rootUrl:URL, type: T.Type, completionHandler: @escaping (_ response: T) -> Void) where T : Decodable {
         let task = URLSession.shared.dataTask(with: rootUrl) { data, response, error in
             if let error = error {
                 print(error)
@@ -49,7 +54,7 @@ class CarAudioService {
             }
             do {
                 let decoder = JSONDecoder()
-                let serviceResponse = try decoder.decode(CarAudioServiceResponse.self, from: data!)
+                let serviceResponse = try decoder.decode(type, from: data!)
                 completionHandler(serviceResponse)
             } catch {
                 print(error)
@@ -59,25 +64,11 @@ class CarAudioService {
         task.resume()
     }
     
-    func getSource(sourceUrl:URL, completionHandler: @escaping (_ response:[CarAudioResponseSectionGroup]) -> Void) {
-        let task = URLSession.shared.dataTask(with: sourceUrl) { data, response, error in
-            if let error = error {
-                print(error)
-                return;
-            }
-            guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-                print(response ?? "unknonwn server side error")
-                return;
-            }
-            do {
-                let decoder = JSONDecoder()
-                let serviceResponse = try decoder.decode([CarAudioResponseSectionGroup].self, from: data!)
-                completionHandler(serviceResponse)
-            } catch {
-                print(error)
-                return;
-            }
-        }
-        task.resume()
+    func getRoot(rootUrl:URL, completionHandler: @escaping (_ response:CarAudioServiceRootResponse) -> Void) {
+        self.get(rootUrl: rootUrl, type: CarAudioServiceRootResponse.self, completionHandler: completionHandler)
+    }
+    
+    func getSection(sourceUrl:URL, completionHandler: @escaping (_ response:CarAudioServiceSectionResponse) -> Void) {
+        self.get(rootUrl: sourceUrl, type: CarAudioServiceSectionResponse.self, completionHandler: completionHandler)
     }
 }

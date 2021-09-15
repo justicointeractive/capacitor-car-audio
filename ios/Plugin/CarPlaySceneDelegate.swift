@@ -46,7 +46,21 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate, CPT
     // MARK: - CPTabBarTemplateDelegate
     @available(iOS 14.0, *)
     func tabBarTemplate(_ tabBarTemplate: CPTabBarTemplate, didSelect selectedTemplate: CPTemplate) {
-        self.loadRoot()
+        let serviceSectionReference = selectedTemplate.userInfo as? CarAudioServiceSectionReferenceResponse;
+        guard let serviceSectionReference = serviceSectionReference else {
+            print("nil service reference")
+            return;
+        }
+        guard let listTemplate = selectedTemplate as? CPListTemplate else {
+            print("not a list template")
+            return;
+        }
+        
+        let sectionUrl = URL(string: serviceSectionReference.url, relativeTo: URL(string:UserDefaults.standard.carAudioPluginUrl!))!
+        
+        self.service.getSection(sourceUrl: sectionUrl) { section in
+            self.populateListTemplate(rootUrl: sectionUrl, items: section.items, listTemplate: listTemplate)
+        }
     }
     
     // MARK: - CarPlaySceneDelegate
@@ -72,8 +86,6 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate, CPT
         
         self.service.getRoot(rootUrl: url) { serviceResponse in
             serviceResponse.items.enumerated().forEach { (tabIndex, tab) in
-                let tabSections = self.toTabSections(rootUrl: url, items: tab.items)
-                
                 var tabListTemplate: CPListTemplate;
                 
                 if tabTemplates.count > tabIndex {
@@ -84,7 +96,9 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate, CPT
                 }
                 tabListTemplate.tabTitle = tab.title
                 tabListTemplate.showsTabBadge = false
-                tabListTemplate.updateSections(tabSections)
+                tabListTemplate.userInfo = tab
+                tabListTemplate.emptyViewTitleVariants = ["Loading"]
+                tabListTemplate.emptyViewSubtitleVariants = [""]
                 
                 if let iconContents = FileManager.default.contents(atPath: Bundle.main.bundlePath + "/public/assets/img/\(tab.icon).svg") {
                     // HACK: SVGKit barfs on the first attempt to load an image but loads anything subsequent just fine...
@@ -103,8 +117,11 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate, CPT
     }
     
     @available(iOS 14.0, *)
-    func toTabSections(rootUrl:URL, items: [CarAudioResponseSectionGroup]) -> [CPListSection]{
+    func populateListTemplate(rootUrl:URL, items: [CarAudioResponseSectionGroup], listTemplate: CPListTemplate) {
         var tabSections: [CPListSection] = []
+        
+        listTemplate.emptyViewTitleVariants = ["Empty"]
+        listTemplate.emptyViewSubtitleVariants = ["No content available"]
 
         items.forEach { group in
             var tabSectionItems: [CPListItem] = []
@@ -113,6 +130,8 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate, CPT
                 let listItem = CPListItem(text: item.title, detailText: item.description);
                 listItem.handler = { _, completion in
                     switch (item.type) {
+                    case "upcoming":
+                        self.showUpcomingItemAlert(item);
                     case "playable":
                         self.playItem(item);
                     case "browsable":
@@ -143,12 +162,37 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate, CPT
             tabSections.append(listSection)
         }
         
-        return tabSections
+        listTemplate.updateSections(tabSections)
+    }
+    
+    let dateFormatter: DateFormatter = {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "EEEE, MMMM d 'at' H:mm a"
+        return dateFormatter;
+    }()
+    
+    let isoFormatter: ISO8601DateFormatter = {
+        let isoFormatter = ISO8601DateFormatter()
+        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds];
+        return isoFormatter;
+    }()
+    
+    @available(iOS 14.0, *)
+    func showUpcomingItemAlert(_ item: CarAudioResponseSectionItem) {
+        let parsedDate = isoFormatter.date(from: item.publishDate!)
+        let formattedDate = dateFormatter.string(from: parsedDate!)
+        
+        let alertTemplate = CPAlertTemplate(titleVariants: ["\(item.title) will begin \(formattedDate)"], actions: [
+                                                CPAlertAction(title: "Ok", style: .cancel) { action in
+                                                    self.interfaceController.dismissTemplate(animated: true)
+                                                }
+        ])
+        self.interfaceController.presentTemplate(alertTemplate, animated: true)
     }
     
     @available(iOS 14.0, *)
     func playItem(_ item: CarAudioResponseSectionItem) {
-        let playerItem = AVPlayerItem(url: URL(string: item.url)!)
+        let playerItem = AVPlayerItem(url: URL(string: item.url!)!)
         self.player = AVQueuePlayer(items:[playerItem])
         self.player!.play();
         self.interfaceController.pushTemplate(CPNowPlayingTemplate.shared, animated: true)
@@ -157,11 +201,9 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate, CPT
     @available(iOS 14.0, *)
     func browseItem(_ rootUrl:URL, item: CarAudioResponseSectionItem) {
         let listTemplate = CPListTemplate(title: item.title, sections: [])
-        print(item.url, rootUrl)
-        let sourceUrl = URL(string: item.url, relativeTo: rootUrl)!
-        self.service.getSource(sourceUrl: sourceUrl) { items in
-            print(items)
-            listTemplate.updateSections(self.toTabSections(rootUrl: sourceUrl, items: items))
+        let sourceUrl = URL(string: item.url!, relativeTo: rootUrl)!
+        self.service.getSection(sourceUrl: sourceUrl) { section in
+            self.populateListTemplate(rootUrl: sourceUrl, items: section.items, listTemplate: listTemplate)
         }
         self.interfaceController.pushTemplate(listTemplate, animated: true)
     }
