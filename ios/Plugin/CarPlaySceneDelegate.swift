@@ -109,9 +109,7 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate, CPT
                 }
             }
             
-            if (tabTemplates.count != rootTabTemplate.templates.count) {
-                rootTabTemplate.updateTemplates(tabTemplates)
-            }
+            rootTabTemplate.updateTemplates(tabTemplates)
             
         }
     }
