@@ -1,6 +1,6 @@
 {
   "name": "@justicointeractive/capacitor-car-audio",
-  "version": "0.0.1-beta1",
+  "version": "0.0.1-beta1.0",
   "description": "Provides Apple CarPlay and Android Auto support for Capacitor audio apps",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
