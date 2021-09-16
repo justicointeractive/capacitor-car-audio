@@ -8,35 +8,52 @@
 import Foundation
 
 
-struct CarAudioServiceRootResponse : Codable {
+struct CarContentTabsResponse : Codable {
     let type: String;
-    let items: [CarAudioServiceSectionReferenceResponse];
+    let items: [CarContentTabsTabReference];
 }
 
-struct CarAudioServiceSectionReferenceResponse : Codable {
+struct CarContentTabsTabReference : Codable {
     let title: String;
     let icon: String;
     let type: String;
     let url: String;
 }
 
-struct CarAudioServiceSectionResponse : Codable {
-    let items: [CarAudioResponseSectionGroup];
+struct CarContentListResponse : Codable {
+    let type: String;
+    let items: [CarContentSection];
 }
 
-struct CarAudioResponseSectionGroup : Codable {
+struct CarContentGridResponse : Codable {
+    let type: String;
+    let items: [CarContentSection];
+}
+
+struct CarContentSection : Codable {
     let type: String;
     let title: String;
+    let indexTitle: String?;
     let displayAs: String?;
-    let items: [CarAudioResponseSectionItem];
+    let items: [CarContentItem];
 }
 
-struct CarAudioResponseSectionItem : Codable {
+struct CarContentItem : Codable {
     let type: String;
     let title: String;
     let description: String;
-    let url: String?;
+    
+    // browsable
+    let displayAs: String?;
+    
+    // playable
     let imageUrl: String?;
+    let artworkUrl: String?;
+    
+    // browsable & playable
+    let url: String?;
+    
+    // upcoming & playable
     let publishDate: String?;
 }
 
@@ -64,11 +81,11 @@ class CarAudioService {
         task.resume()
     }
     
-    func getRoot(rootUrl:URL, completionHandler: @escaping (_ response:CarAudioServiceRootResponse) -> Void) {
-        self.get(rootUrl: rootUrl, type: CarAudioServiceRootResponse.self, completionHandler: completionHandler)
+    func getRoot(rootUrl:URL, completionHandler: @escaping (_ response:CarContentTabsResponse) -> Void) {
+        self.get(rootUrl: rootUrl, type: CarContentTabsResponse.self, completionHandler: completionHandler)
     }
     
-    func getSection(sourceUrl:URL, completionHandler: @escaping (_ response:CarAudioServiceSectionResponse) -> Void) {
-        self.get(rootUrl: sourceUrl, type: CarAudioServiceSectionResponse.self, completionHandler: completionHandler)
+    func getSection(sourceUrl:URL, completionHandler: @escaping (_ response:CarContentListResponse) -> Void) {
+        self.get(rootUrl: sourceUrl, type: CarContentListResponse.self, completionHandler: completionHandler)
     }
 }
