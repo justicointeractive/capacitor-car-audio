@@ -71,9 +71,11 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate, CPT
     
     @available(iOS 14.0, *)
     func loadRoot(){
-        let rootUrl = UserDefaults.standard.carAudioPluginUrl
+        guard let rootUrl = UserDefaults.standard.carAudioPluginUrl else {
+            return;
+        }
         
-        var urlComponents = URLComponents(string: rootUrl!)!
+        var urlComponents = URLComponents(string: rootUrl)!
         urlComponents.queryItems = (urlComponents.queryItems ?? []) + [
             URLQueryItem(name: "maxItemCount", value: String(CPListTemplate.maximumItemCount)),
             URLQueryItem(name: "maxSectionCount", value: String(CPListTemplate.maximumSectionCount)),
