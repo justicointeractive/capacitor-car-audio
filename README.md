@@ -23,14 +23,12 @@ npx cap sync
 ### setRoot(...)
 
 ```typescript
-setRoot(options: { url: string; }) => any
+setRoot(options: { url: string; }) => Promise<void>
 ```
 
 | Param         | Type                          |
 | ------------- | ----------------------------- |
 | **`options`** | <code>{ url: string; }</code> |
-
-**Returns:** <code>any</code>
 
 --------------------
 

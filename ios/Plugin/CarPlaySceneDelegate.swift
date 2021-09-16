@@ -47,8 +47,7 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate, CPT
     // MARK: - CPTabBarTemplateDelegate
     @available(iOS 14.0, *)
     func tabBarTemplate(_ tabBarTemplate: CPTabBarTemplate, didSelect selectedTemplate: CPTemplate) {
-        let serviceSectionReference = selectedTemplate.userInfo as? CarContentTabsTabReference;
-        guard let serviceSectionReference = serviceSectionReference else {
+        guard let serviceSectionReference = selectedTemplate.userInfo as? CarContentTabsTabReference else {
             print("nil service reference")
             return;
         }
