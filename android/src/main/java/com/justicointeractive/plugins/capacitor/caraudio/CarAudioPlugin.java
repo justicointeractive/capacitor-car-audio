@@ -9,14 +9,8 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 @CapacitorPlugin(name = "CarAudio")
 public class CarAudioPlugin extends Plugin {
 
-    private CarAudio implementation = new CarAudio();
-
     @PluginMethod
-    public void echo(PluginCall call) {
-        String value = call.getString("value");
-
-        JSObject ret = new JSObject();
-        ret.put("value", implementation.echo(value));
-        call.resolve(ret);
+    public void setRoot(PluginCall call) {
+        call.unimplemented();
     }
 }
