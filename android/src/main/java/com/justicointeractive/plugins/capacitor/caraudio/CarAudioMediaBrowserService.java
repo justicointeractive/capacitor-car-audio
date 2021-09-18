@@ -151,21 +151,31 @@ public class CarAudioMediaBrowserService extends MediaBrowserServiceCompat {
                                     .setTitle(item.getString("title"))
                                     .setMediaId(itemUrl);
 
-                                File imageFile = Glide.with(this)
-                                        .downloadOnly()
-                                        .load(item.getString("imageUrl"))
-                                        .submit()
-                                        .get();
+                                try {
+                                    if (!item.isNull("imageUrl")) {
+                                        String imageUrl = item.getString("imageUrl");
 
-                                Log.d("carAudio", imageFile.getAbsolutePath());
+                                        File imageFile = Glide.with(this)
+                                                .downloadOnly()
+                                                .load(imageUrl)
+                                                .submit()
+                                                .get();
 
-                                Uri imageFileUri = new Uri.Builder()
-                                        .scheme(ContentResolver.SCHEME_CONTENT)
-                                        .authority(this.getPackageName() + ".fileprovider")
-                                        .appendPath(imageFile.getPath())
-                                        .build();
+                                        String cacheRelativeFilePath = imageFile.getPath().substring((int) getCacheDir().getPath().length());
 
-                                builder.setIconUri(imageFileUri);
+                                        Log.d("carAudio", cacheRelativeFilePath);
+
+                                        Uri imageFileUri = new Uri.Builder()
+                                                .scheme(ContentResolver.SCHEME_CONTENT)
+                                                .authority(this.getPackageName() + ".caraudiofileprovider")
+                                                .path(cacheRelativeFilePath)
+                                                .build();
+
+                                        builder.setIconUri(imageFileUri);
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
 
                                 Bundle extras = new Bundle();
                                 extras.putString(MediaConstants.DESCRIPTION_EXTRAS_KEY_CONTENT_STYLE_GROUP_TITLE, group.getString("title"));

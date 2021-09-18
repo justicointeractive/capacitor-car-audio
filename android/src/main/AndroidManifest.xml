@@ -9,5 +9,9 @@
 
 
         <meta-data android:name="com.google.android.gms.car.application" android:resource="@xml/automotive_app_desc"/>
+
+
+        <provider android:name=".CarAudioFileProvider" android:authorities="${applicationId}.caraudiofileprovider" android:exported="true" android:grantUriPermissions="true">
+        </provider>
     </application>
 </manifest>
