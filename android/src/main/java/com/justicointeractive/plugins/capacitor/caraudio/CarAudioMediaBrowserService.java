@@ -87,12 +87,18 @@ public class CarAudioMediaBrowserService extends MediaBrowserServiceCompat {
                             ArrayList<MediaBrowserCompat.MediaItem> mediaItems = new ArrayList<>();
                             for (int i = 0; i < tabs.length(); i++) {
                                 JSONObject tab = tabs.getJSONObject(i);
+                                Uri iconUri = new Uri.Builder()
+                                        .scheme(ContentResolver.SCHEME_CONTENT)
+                                        .authority(this.getPackageName() + ".caraudiofileprovider")
+                                        .appendPath("assets")
+                                        .appendPath("public/assets/img/" + tab.getString("icon") + ".svg")
+                                        .build();
                                 mediaItems.add(
                                         new MediaBrowserCompat.MediaItem(
                                                 new MediaDescriptionCompat.Builder()
                                                         .setMediaId(tab.getString("url"))
                                                         .setTitle(tab.getString("title"))
-                                                        .setIconUri(Uri.parse("content://assets/public/assets/img/" + tab.getString("icon") + ".svg"))
+                                                        .setIconUri(iconUri)
                                                         .build(),
                                                 MediaBrowserCompat.MediaItem.FLAG_BROWSABLE
                                         )
