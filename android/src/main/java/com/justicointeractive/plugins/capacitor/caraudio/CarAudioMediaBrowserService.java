@@ -7,14 +7,10 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaDescriptionCompat;
-import android.support.v4.media.MediaMetadataCompat;
-import android.support.v4.media.session.MediaSessionCompat;
-import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,18 +20,13 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.bumptech.glide.Glide;
-import com.justicointeractive.plugins.capacitor.audio.AudioPlugin;
 import com.justicointeractive.plugins.capacitor.audio.AudioPluginService;
 
-import java.io.File;
-import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 public class CarAudioMediaBrowserService extends MediaBrowserServiceCompat {
@@ -155,20 +146,11 @@ public class CarAudioMediaBrowserService extends MediaBrowserServiceCompat {
                                     if (!item.isNull("imageUrl")) {
                                         String imageUrl = item.getString("imageUrl");
 
-                                        File imageFile = Glide.with(this)
-                                                .downloadOnly()
-                                                .load(imageUrl)
-                                                .submit()
-                                                .get();
-
-                                        String cacheRelativeFilePath = imageFile.getPath().substring((int) getCacheDir().getPath().length());
-
-                                        Log.d("carAudio", cacheRelativeFilePath);
-
                                         Uri imageFileUri = new Uri.Builder()
                                                 .scheme(ContentResolver.SCHEME_CONTENT)
                                                 .authority(this.getPackageName() + ".caraudiofileprovider")
-                                                .path(cacheRelativeFilePath)
+                                                .appendPath("imagefetch")
+                                                .appendPath(imageUrl)
                                                 .build();
 
                                         builder.setIconUri(imageFileUri);
