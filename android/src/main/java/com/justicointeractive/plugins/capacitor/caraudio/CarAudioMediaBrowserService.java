@@ -12,22 +12,25 @@ import android.os.IBinder;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.media.MediaBrowserServiceCompat;
 import androidx.media.utils.MediaConstants;
+
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.justicointeractive.plugins.capacitor.audio.AudioPluginService;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 public class CarAudioMediaBrowserService extends MediaBrowserServiceCompat {
 
@@ -87,18 +90,18 @@ public class CarAudioMediaBrowserService extends MediaBrowserServiceCompat {
                             ArrayList<MediaBrowserCompat.MediaItem> mediaItems = new ArrayList<>();
                             for (int i = 0; i < tabs.length(); i++) {
                                 JSONObject tab = tabs.getJSONObject(i);
-                                Uri iconUri = new Uri.Builder()
-                                        .scheme(ContentResolver.SCHEME_CONTENT)
-                                        .authority(this.getPackageName() + ".caraudiofileprovider")
-                                        .appendPath("assets")
-                                        .appendPath("public/assets/img/" + tab.getString("icon") + ".svg")
+                                int resourceId = this.getResources().getIdentifier(tab.getString("icon"), "drawable", this.getPackageName());
+                                Uri iconContentUri = new Uri.Builder()
+                                        .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+                                        .authority(this.getPackageName())
+                                        .appendPath(String.valueOf(resourceId))
                                         .build();
                                 mediaItems.add(
                                         new MediaBrowserCompat.MediaItem(
                                                 new MediaDescriptionCompat.Builder()
                                                         .setMediaId(tab.getString("url"))
                                                         .setTitle(tab.getString("title"))
-                                                        .setIconUri(iconUri)
+                                                        .setIconUri(iconContentUri)
                                                         .build(),
                                                 MediaBrowserCompat.MediaItem.FLAG_BROWSABLE
                                         )

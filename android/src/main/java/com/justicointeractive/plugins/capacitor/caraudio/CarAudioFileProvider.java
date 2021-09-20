@@ -16,7 +16,6 @@ import com.getcapacitor.Logger;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -75,27 +74,6 @@ public class CarAudioFileProvider extends ContentProvider {
                         .load(imageUrl)
                         .submit()
                         .get();
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new FileNotFoundException();
-            }
-        }
-
-        if (segments.get(0).equals("assets")) {
-            String imageUrl = segments.get(1);
-            try {
-                File cacheDir = context.getExternalCacheDir();
-                if (cacheDir == null) {
-                    cacheDir = context.getCacheDir();
-                }
-                File cacheFile = new File(cacheDir, hash(imageUrl));
-                if (!cacheFile.exists()) {
-                    InputStream in = context.getAssets().open(imageUrl);
-                    FileOutputStream out = new FileOutputStream(cacheFile);
-                    copyFile(in, out);
-                }
-                file = cacheFile;
-
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new FileNotFoundException();

@@ -2,7 +2,7 @@ package com.justicointeractive.plugins.capacitor.caraudio;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import com.getcapacitor.JSObject;
+
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
