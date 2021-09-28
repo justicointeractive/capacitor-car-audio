@@ -49,6 +49,8 @@ struct CarContentItem : Codable {
     // playable
     let imageUrl: String?;
     let artworkUrl: String?;
+    let contentType: String?;
+    let itemId: String?;
     
     // browsable & playable
     let url: String?;
