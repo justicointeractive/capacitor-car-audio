@@ -22,6 +22,12 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate, CPT
                                   didConnect interfaceController: CPInterfaceController) {
         self.interfaceController = interfaceController
         
+        self.logEventIfFirebaseAnalyticsAvailable(
+            name: "launch_car_app",
+            parameters: [
+                "car_app_type": "CarPlay" as NSObject
+            ])
+        
         if #available(iOS 14.0, *) {
             let tabTemplate = CPTabBarTemplate(templates: [])
             tabTemplate.delegate = self
@@ -42,6 +48,17 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate, CPT
         self.interfaceController = nil
         observer?.invalidate()
         observer = nil
+    }
+    
+    // MARK: - FirebaseAnalytics
+    func logEventIfFirebaseAnalyticsAvailable(name: String, parameters: Dictionary<NSString, NSObject>) {
+        let firebaseAnalyticsClassName = "FIRAnalytics";
+        if let loadedClass = NSClassFromString(firebaseAnalyticsClassName) as? NSObject.Type {
+            let logEventSelector = Selector("logEventWithName:parameters:")
+            if loadedClass.responds(to: logEventSelector) {
+                loadedClass.perform(logEventSelector, with: name, with: parameters)
+            }
+        }
     }
     
     // MARK: - CPTabBarTemplateDelegate
@@ -253,6 +270,14 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate, CPT
     @available(iOS 14.0, *)
     func playItem(_ item: CarContentItem) {
         let session = AVAudioSession.sharedInstance()
+        
+        self.logEventIfFirebaseAnalyticsAvailable(
+            name: "select_content",
+            parameters: [
+                "content_type": (item.contentType ?? "") as NSObject,
+                "item_id": (item.itemId ?? "") as NSObject
+            ])
+        
         do {
             try session.setCategory(.playback)
             try session.setActive(true)
