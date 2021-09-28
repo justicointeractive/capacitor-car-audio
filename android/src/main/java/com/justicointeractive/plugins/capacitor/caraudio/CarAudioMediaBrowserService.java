@@ -36,6 +36,7 @@ public class CarAudioMediaBrowserService extends MediaBrowserServiceCompat {
 
     AudioPluginService service;
     RequestQueue requestQueue;
+    private boolean hasSentCarAppLaunchEvent = false;
 
     @Override
     public void onCreate() {
@@ -67,6 +68,12 @@ public class CarAudioMediaBrowserService extends MediaBrowserServiceCompat {
     @Nullable
     @Override
     public BrowserRoot onGetRoot(@NonNull String clientPackageName, int clientUid, @Nullable Bundle rootHints) {
+        if (clientPackageName.equals("com.google.android.projection.gearhead") && !hasSentCarAppLaunchEvent) {
+            Bundle carAppLaunchEventParameters = new Bundle();
+            carAppLaunchEventParameters.putString("car_app_type", "Android Auto");
+            service.logEventIfFirebaseAnalyticsIsAvailable("car_app_launch", carAppLaunchEventParameters);
+            hasSentCarAppLaunchEvent = true;
+        }
         return new MediaBrowserServiceCompat.BrowserRoot("0", null);
     }
 
@@ -180,6 +187,9 @@ public class CarAudioMediaBrowserService extends MediaBrowserServiceCompat {
                                         extras.putString("title", item.getString("title"));
                                         extras.putString("artist", item.getString("description"));
                                         extras.putString("artwork", item.getString("artworkUrl"));
+                                        extras.putString("itemId", item.getString("itemId"));
+                                        extras.putString("contentType", item.getString("contentType"));
+                                        extras.putString("car_app_type", "Android Auto");
                                         mediaItems.add(
                                             new MediaBrowserCompat.MediaItem(builder.build(), MediaBrowserCompat.MediaItem.FLAG_PLAYABLE)
                                         );
