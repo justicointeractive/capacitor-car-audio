@@ -275,7 +275,8 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate, CPT
             name: "select_content",
             parameters: [
                 "content_type": (item.contentType ?? "") as NSObject,
-                "item_id": (item.itemId ?? "") as NSObject
+                "item_id": (item.itemId ?? "") as NSObject,
+                "car_app_type": "CarPlay" as NSObject
             ])
         
         do {
