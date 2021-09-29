@@ -96,9 +96,9 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate, CPT
         urlComponents.queryItems = (urlComponents.queryItems ?? []) + [
             URLQueryItem(name: "maxItemCount", value: String(CPListTemplate.maximumItemCount)),
             URLQueryItem(name: "maxSectionCount", value: String(CPListTemplate.maximumSectionCount)),
-            URLQueryItem(name: "maxGridItemsCount", value: String(8)),
-            URLQueryItem(name: "maxImageGridItemImages", value: String(CPMaximumNumberOfGridImages))
+            URLQueryItem(name: "maxGridItemsCount", value: String(8))
         ]
+        
         let url = urlComponents.url!
         
         let rootTabTemplate: CPTabBarTemplate = self.interfaceController.rootTemplate as! CPTabBarTemplate;
