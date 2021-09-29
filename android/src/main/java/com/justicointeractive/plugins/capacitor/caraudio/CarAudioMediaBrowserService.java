@@ -36,7 +36,7 @@ public class CarAudioMediaBrowserService extends MediaBrowserServiceCompat {
     AudioPluginService service;
     RequestQueue requestQueue;
     
-    private boolean androidAutoHasLaunched = false;
+    private boolean rootHasBeenRequestedByAndroidAuto = false;
 
     @Override
     public void onCreate() {
@@ -54,8 +54,8 @@ public class CarAudioMediaBrowserService extends MediaBrowserServiceCompat {
                                 AudioPluginService.AudioPluginServiceBinder binder = (AudioPluginService.AudioPluginServiceBinder) iBinder;
                                 service = binder.getService();
                                 CarAudioMediaBrowserService.this.setSessionToken(service.mediaSession.getSessionToken());
-                                if (androidAutoHasLaunched) {
-                                    sendAndroidAutoLaunchEvent();
+                                if (rootHasBeenRequestedByAndroidAuto) {
+                                    androidAutoLaunched();
                                 }
                             }
 
@@ -71,10 +71,10 @@ public class CarAudioMediaBrowserService extends MediaBrowserServiceCompat {
     @Nullable
     @Override
     public BrowserRoot onGetRoot(@NonNull String clientPackageName, int clientUid, @Nullable Bundle rootHints) {
-        if (clientPackageName.equals("com.google.android.projection.gearhead") && !androidAutoHasLaunched) {
-            androidAutoHasLaunched = true;
+        if (clientPackageName.equals("com.google.android.projection.gearhead") && !rootHasBeenRequestedByAndroidAuto) {
+            rootHasBeenRequestedByAndroidAuto = true;
             if (service != null) {
-                sendAndroidAutoLaunchEvent();
+                androidAutoLaunched();
             }
         }
         return new MediaBrowserServiceCompat.BrowserRoot("0", null);
@@ -221,7 +221,7 @@ public class CarAudioMediaBrowserService extends MediaBrowserServiceCompat {
         }
     }
 
-    private void sendAndroidAutoLaunchEvent() {
+    private void androidAutoLaunched() {
         Bundle carAppLaunchEventParameters = new Bundle();
         carAppLaunchEventParameters.putString("car_app_type", "Android Auto");
         service.logEventIfFirebaseAnalyticsIsAvailable("car_app_launch", carAppLaunchEventParameters);
