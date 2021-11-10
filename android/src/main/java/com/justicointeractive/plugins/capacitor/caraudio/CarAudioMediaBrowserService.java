@@ -22,6 +22,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.getcapacitor.CapConfig;
 import com.justicointeractive.plugins.capacitor.audio.AudioPluginService;
 
 import org.json.JSONArray;
@@ -85,8 +86,10 @@ public class CarAudioMediaBrowserService extends MediaBrowserServiceCompat {
         result.detach();
 
         Log.d("carAudio", "parentId: " + parentId);
+        CapConfig capConfig = CapConfig.loadDefault(this.getApplicationContext());
+        String defaultRootUrl = capConfig.getPluginConfiguration("capacitor-car-audio").getString("rootUrl", null);
         SharedPreferences prefs = this.getApplicationContext().getSharedPreferences("carAudio", Context.MODE_PRIVATE);
-        String rootUrl = prefs.getString("rootUrl", null);
+        String rootUrl = prefs.getString("rootUrl", defaultRootUrl);
 
         if (parentId.equals("0")) {
             JsonObjectRequest request = new JsonObjectRequest(
